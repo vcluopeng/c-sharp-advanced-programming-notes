@@ -1,12 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-var pipe = new PipeBuilder((x) => x.Dump("mainAction"))
+var pipe = new PipeBuilder((x) => x.Dump("mainAction =============="))
                     .AddPipe(typeof(FirstPipe))
-                    .AddPipe(typeof(Second))
                     .AddPipe(typeof(Second))
                     .AddPipe(typeof(Try))
                     .Build();
-pipe("hi");
+pipe.Invoke("hi");
 Console.ReadKey();
 
 
@@ -19,8 +18,9 @@ public class FirstPipe : Pipe
 
     public override void Handle(string s)
     {
-        s.Dump("First");
+        s.Dump("First start===");
         _action(s);
+        s.Dump("First end=====");
     }
 }
 public class Second : Pipe
@@ -32,8 +32,9 @@ public class Second : Pipe
 
     public override void Handle(string s)
     {
-        s.Dump("Second");
+        s.Dump("Second start=====");
         _action(s);
+        s.Dump("Second end=======");
     }
 }
 
@@ -48,8 +49,9 @@ public class Try : Pipe
     {
         try
         {
-            s.Dump("Try");
+            s.Dump("Try start===========");
             _action(s);
+            s.Dump("Try end=============");
         }
         catch (Exception ex)
         {
@@ -81,7 +83,7 @@ public class PipeBuilder
     {
         if (!pipeType.IsSubclassOf(typeof(Pipe)))
         {
-            throw new Exception($"请实现{nameof(Pipe)}");
+            throw new NotImplementedException($"参数{nameof(pipeType)}需要继承{nameof(Pipe)}");
         }
         _pipeTypes.Add(pipeType);
         return this;
@@ -102,6 +104,7 @@ public class PipeBuilder
     }
     public Action<string> Build()
     {
+        if (!_pipeTypes.Any()) return _mainAction;
         return CreatePipe(0);
     }
 }
@@ -115,6 +118,6 @@ public static class ConsoleDump
             Console.WriteLine(s);
             return;
         }
-        Console.WriteLine($"[{t}]：{s}");
+        Console.WriteLine($"{t} => {s}");
     }
 }
